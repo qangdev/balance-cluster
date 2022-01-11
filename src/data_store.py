@@ -29,6 +29,8 @@ node_dict[first_name] = first_node
 first_node.initialize_vnode_map(node_names)
 vnode_map = first_node.clone_vnode_map()
 
+print('###############  CLONE ###############\n')
+
 # Creates other nodes, intializing them with the same vnode mapping
 # Also updates the complete node mapping in all nodes
 for i in range(1, len(node_names)):

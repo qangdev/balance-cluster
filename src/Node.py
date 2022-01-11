@@ -37,10 +37,16 @@ class Node:
         
         # Problem statement 2.a
         # Update this function to return value from local store if exists (assuming it's the owner)
+        if key in self._data_store:
+            return self._data_store[key]
         # Otherwise it should find the owner using get_assigned_node function in _vnode_map
         # and use get_data in that node to return the value
-
-        return self._data_store[key]
+        
+        # Find the correct node name by take key % TOTAL_VIRTUAL_NODES to get the node location
+        node_name = self._vnode_map.get_assigned_node(key) # self._vnode_map.vnode_map[key % self._TOTAL_VIRTUAL_NODES]
+        node_target = self._node_dict[node_name]
+        return node_target._data_store[key]
+        
 
 
 
@@ -51,15 +57,20 @@ class Node:
     # 'force' will be used during rebalancing in node addition/deletion
     # This is so that data can be saved first before vnode map update
     def set_data(self, key, value, force=False):
+        # Note: Key is User Id
         if (force):
             self._data_store[key] = copy.deepcopy(value)
         else:
-            
             # Problem statement 2.b
             # Update this else section to find the owner using get_assigned_node function in _vnode_map
             # and set the value in the correct node. Use direct assignment if its the current node
             # or call set_data in the remote note otherwise
-            self._data_store[key] = copy.deepcopy(value)
+            node_name = self._vnode_map.get_assigned_node(key) # self._vnode_map.vnode_map[key % self._TOTAL_VIRTUAL_NODES]
+            if node_name == self.name:
+                self._data_store[key] = copy.deepcopy(value)
+            else:
+                node_target = self._node_dict[node_name]
+                node_target.set_data(key, value)
 
     def remove_data(self, key):
         return self._data_store.pop(key, 'Key not found')
@@ -97,14 +108,17 @@ class Node:
     # after all the relevant keys have been sent to the new owner
     def transfer_keys(self, transfer_dict):
         for vnode, transfer_data in transfer_dict.items():
+            print("=== STAGE 1 ===")
             target_node_name = transfer_data['target_node']
             target_node = self._node_dict[target_node_name]
 
+            print("=== STAGE 2 ===")
             # Transfer all keys for a vnode and remove them from the existing node
             for key in transfer_data['keys']:
                 target_node.set_data(key, self._data_store[key], True)
                 entry = self.remove_data(key)
 
+            print("=== STAGE 3 ===")
             # Update virtual node maps for everyone
             for node in self._node_dict.values():
                 node.set_vnode_map_entry(vnode, target_node_name)
@@ -119,7 +133,10 @@ class Node:
         # Problem statement 3.a
         # Finds all vnodes mapped to this node and shuffles them
         # Implement this logic and store in local_vnode_list        
-
+        for idx, node_name in self._vnode_map.vnode_map.items():
+            if node_name == self.name:
+                local_vnode_list.append(idx) 
+        random.shuffle(local_vnode_list)
         # Prepares to select proportional vnodes and their corresponding keys to transfer
         transfer_slice = round(len(local_vnode_list) / len(self._node_dict))
         local_vnode_slice = local_vnode_list[0:transfer_slice]
@@ -136,7 +153,14 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids
-        
+        user_ids = list(self._data_store.keys())
+        # TODO: How to devive user ids equaly for local_vnode_slice
+        for key in local_vnode_slice:
+            transfer_dict[key] = {
+                'target_node': new_node_name,
+                'keys': # TODO: Continue here
+            } 
+
         # Transfer the remapped keys to the new node
         self.transfer_keys(transfer_dict)
 

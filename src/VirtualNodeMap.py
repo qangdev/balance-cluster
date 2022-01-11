@@ -24,9 +24,14 @@ class VirtualNodeMap:
         # Problem statement 1
         # Generate a dict of vnode ids (0 to (TOTAL_VIRTUAL_NODES - 1) mapped randomly
         # but equally (as far as maths permits) to node names
+
+        pointer = 0  # to make sure node name are distribluted equaly
         self._vnode_map = {}
         for i in range(self._TOTAL_VIRTUAL_NODES):
-            self._vnode_map[i] = self._node_names[0]  # All are assigned to the first node name
+            if pointer == len(self.node_names):
+                pointer = 0
+            self._vnode_map[i] = self._node_names[pointer]
+            pointer += 1
 
     # Return the vnode name mapped to a particular vnode
     def get_node_for_vnode(self, vnode):
