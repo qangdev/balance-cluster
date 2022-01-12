@@ -92,6 +92,7 @@ print('\n\n')
 print('Random pickup of various keys on any node')
 for i in range(10):
     user_id = random.randint(0, INITIAL_NUM_KEYS - 1)
+    # TODO: The below has bug
     print(new_node.get_data(user_id))
 print('\n\n')
 
@@ -99,38 +100,38 @@ print('\n\n')
 # Planned removal of a node from Data Store and reassignment of its vnodes
 print('###############  REMOVING A NODE ###############\n')
 
-# Remove any random node
-# remove_current_node is only called on the to-be removed node
-random.shuffle(node_names)
-del_node_name = node_names.pop(0)
-del_node = node_dict.pop(del_node_name, 'key not found')
-del_node.remove_current_node(node_dict)
+# # Remove any random node
+# # remove_current_node is only called on the to-be removed node
+# random.shuffle(node_names)
+# del_node_name = node_names.pop(0)
+# del_node = node_dict.pop(del_node_name, 'key not found')
+# del_node.remove_current_node(node_dict)
 
 
-# List node names and key counts
-for node in node_dict.values():
-    print(node)
-print('\n\n')
+# # List node names and key counts
+# for node in node_dict.values():
+#     print(node)
+# print('\n\n')
 
-# Pick any node from the remaining ones
-node_iter = iter(node_dict.values())
-any_node = next(node_iter)
-any_other_node = next(node_iter)
+# # Pick any node from the remaining ones
+# node_iter = iter(node_dict.values())
+# any_node = next(node_iter)
+# any_other_node = next(node_iter)
 
 
-# List random keys by calling any node
-print('Random pickup of various keys on any node')
-for i in range(10):
-    user_id = random.randint(0, INITIAL_NUM_KEYS - 1)
-    print(any_node.get_data(user_id))
-print('\n\n')
+# # List random keys by calling any node
+# print('Random pickup of various keys on any node')
+# for i in range(10):
+#     user_id = random.randint(0, INITIAL_NUM_KEYS - 1)
+#     print(any_node.get_data(user_id))
+# print('\n\n')
 
-# Test read/write on a new key
-user_info = UserInfo(InfoGenerator.generate_user_id(),
-                             UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
-                                        InfoGenerator.generate_password(PASSWORD_LENGTH)))
+# # Test read/write on a new key
+# user_info = UserInfo(InfoGenerator.generate_user_id(),
+#                              UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
+#                                         InfoGenerator.generate_password(PASSWORD_LENGTH)))
 
-print(f'Generated user data: {user_info.user_data}')
-any_node.set_data(user_info.user_id, user_info.user_data)
-fetched_user_data = any_other_node.get_data(user_info.user_id)
-print(f'Fetched user data: {fetched_user_data}')
+# print(f'Generated user data: {user_info.user_data}')
+# any_node.set_data(user_info.user_id, user_info.user_data)
+# fetched_user_data = any_other_node.get_data(user_info.user_id)
+# print(f'Fetched user data: {fetched_user_data}')

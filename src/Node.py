@@ -28,6 +28,9 @@ class Node:
     def node_names(self):
         return list(self._node_dict.keys())
 
+    @property
+    def data_len(self):
+        return len(self._data_store)
     
     # For a masterless data fetch, any key can be requested from any Node
     # The Node should return the value directly if it has the ownership
@@ -137,14 +140,15 @@ class Node:
             if node_name == self.name:
                 local_vnode_list.append(idx) 
         random.shuffle(local_vnode_list)
+        
         # Prepares to select proportional vnodes and their corresponding keys to transfer
-        transfer_slice = round(len(local_vnode_list) / len(self._node_dict))
+        transfer_slice = round(len(local_vnode_list) / len(self._node_dict))  # TODO: Why this transfer too little (only 40 users)
         local_vnode_slice = local_vnode_list[0:transfer_slice]
 
         transfer_dict = {}
 
         # Problem statement 3.b
-        # Loop over all keys and create the transfer dict structure
+        # Loop over all keys (user_ids in _data_store) and create the transfer dict structure
         # Only the relevant keys from vnodes in the local_vnode_slice should be considered
         # An example of the structure will look like:
         # transfer_dict{
@@ -153,12 +157,25 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids
-        user_ids = list(self._data_store.keys())
-        # TODO: How to devive user ids equaly for local_vnode_slice
-        for key in local_vnode_slice:
+        
+        # user_ids = list(user_id for user_id in self._data_store.keys() if user_id in local_vnode_slice)  
+        # total_user_ids_need_to_take = self.data_len - (transfer_slice * self._TOTAL_VIRTUAL_NODES)
+        # user_ids = list(self._data_store.keys())[:total_user_ids_need_to_take]  # TODO: Something wrong here
+        
+        # #Devive user ids equaly for local_vnode_slice
+        # chunk_size = math.ceil(len(user_ids)/len(local_vnode_slice))
+        # chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
+        # TODO: data is a bad name, need better
+        data = {vnode: [] for vnode in local_vnode_slice}
+        for user_id in self._data_store:
+            vnode = user_id % self._TOTAL_VIRTUAL_NODES
+            if vnode in local_vnode_slice:
+                data[vnode].append(user_id)
+                
+        for idx, key in enumerate(local_vnode_slice):
             transfer_dict[key] = {
                 'target_node': new_node_name,
-                'keys': # TODO: Continue here
+                'keys': data[key]
             } 
 
         # Transfer the remapped keys to the new node
@@ -175,6 +192,10 @@ class Node:
         # Problem statement 4.a
         # Finds all vnodes mapped to this node and shuffles them
         # Implement this logic and store in local_vnode_list        
+        for idx, node_name in self._vnode_map.vnode_map.items():
+            if node_name == self.name:
+                local_vnode_list.append(idx) 
+        random.shuffle(local_vnode_list)
 
         # Prepares to map all vnodes proportionally and their corresponding keys for transfer
         assigned_node_list = list(self._node_dict.keys()) * math.ceil(len(local_vnode_list) / len(self._node_dict))
@@ -192,6 +213,23 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids        
+        
+        user_ids = list(self._data_store.keys())
+        
+        # aggregate keys to transfer per nodes
+        agg_node_keys = {}
+        for node in self._node_dict.keys():
+            agg_node_keys[node] = [key for key, n in transfer_node_mapping.items() if n == node]
+
+        # Devive user ids equaly for local_vnode_list
+        chunk_size = math.ceil(len(user_ids)/len(local_vnode_list))
+        chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
+        
+        for idx, key in enumerate(transfer_node_mapping):
+            transfer_dict[key] = {
+                'target_node': transfer_node_mapping[key],
+                'keys': chunks_user_ids[idx]
+            }
 
         # Transfer the remapped keys to the extra nodes
         self.transfer_keys(transfer_dict)
