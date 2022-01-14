@@ -111,17 +111,14 @@ class Node:
     # after all the relevant keys have been sent to the new owner
     def transfer_keys(self, transfer_dict):
         for vnode, transfer_data in transfer_dict.items():
-            print("=== STAGE 1 ===")
             target_node_name = transfer_data['target_node']
             target_node = self._node_dict[target_node_name]
 
-            print("=== STAGE 2 ===")
             # Transfer all keys for a vnode and remove them from the existing node
             for key in transfer_data['keys']:
                 target_node.set_data(key, self._data_store[key], True)
                 entry = self.remove_data(key)
 
-            print("=== STAGE 3 ===")
             # Update virtual node maps for everyone
             for node in self._node_dict.values():
                 node.set_vnode_map_entry(vnode, target_node_name)
@@ -142,7 +139,7 @@ class Node:
         random.shuffle(local_vnode_list)
         
         # Prepares to select proportional vnodes and their corresponding keys to transfer
-        transfer_slice = round(len(local_vnode_list) / len(self._node_dict))  # TODO: Why this transfer too little (only 40 users)
+        transfer_slice = round(len(local_vnode_list) / len(self._node_dict))
         local_vnode_slice = local_vnode_list[0:transfer_slice]
 
         transfer_dict = {}
@@ -157,14 +154,6 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids
-        
-        # user_ids = list(user_id for user_id in self._data_store.keys() if user_id in local_vnode_slice)  
-        # total_user_ids_need_to_take = self.data_len - (transfer_slice * self._TOTAL_VIRTUAL_NODES)
-        # user_ids = list(self._data_store.keys())[:total_user_ids_need_to_take]  # TODO: Something wrong here
-        
-        # #Devive user ids equaly for local_vnode_slice
-        # chunk_size = math.ceil(len(user_ids)/len(local_vnode_slice))
-        # chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
         # TODO: data is a bad name, need better
         data = {vnode: [] for vnode in local_vnode_slice}
         for user_id in self._data_store:
@@ -214,21 +203,27 @@ class Node:
         #                }
         # Here 23 and 96 are examples of vnode ids        
         
-        user_ids = list(self._data_store.keys())
+        # user_ids = list(self._data_store.keys())
         
-        # aggregate keys to transfer per nodes
-        agg_node_keys = {}
-        for node in self._node_dict.keys():
-            agg_node_keys[node] = [key for key, n in transfer_node_mapping.items() if n == node]
+        # # aggregate keys to transfer per nodes
+        # agg_node_keys = {}
+        # for node in self._node_dict.keys():
+        #     agg_node_keys[node] = [key for key, n in transfer_node_mapping.items() if n == node]
 
-        # Devive user ids equaly for local_vnode_list
-        chunk_size = math.ceil(len(user_ids)/len(local_vnode_list))
-        chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
-        
+        # # Devive user ids equaly for local_vnode_list
+        # chunk_size = math.ceil(len(user_ids)/len(local_vnode_list))
+        # chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
+        data = {vnode: [] for vnode in local_vnode_list}
+        for user_id in self._data_store:
+            vnode = user_id % self._TOTAL_VIRTUAL_NODES
+            if vnode in local_vnode_list:
+                data[vnode].append(user_id)
+ 
+
         for idx, key in enumerate(transfer_node_mapping):
             transfer_dict[key] = {
                 'target_node': transfer_node_mapping[key],
-                'keys': chunks_user_ids[idx]
+                'keys': data[key]
             }
 
         # Transfer the remapped keys to the extra nodes
