@@ -20,18 +20,22 @@ class VirtualNodeMap:
     # Populates the Virtual Node Nap, given the set of Node names.
     # Creates a mapping of Virtual Node to corresponding assigned physical Node
     def populate_map(self):
+        def generate_pointer(n):
+            # This helps on mapping randonly and equally
+            indexes = list(range(0, n))
+            random.shuffle(indexes)
+            return indexes
 
         # Problem statement 1
         # Generate a dict of vnode ids (0 to (TOTAL_VIRTUAL_NODES - 1) mapped randomly
         # but equally (as far as maths permits) to node names
-
-        pointer = 0  # to make sure node name are distribluted equaly
         self._vnode_map = {}
+        
+        pointers = []
         for i in range(self._TOTAL_VIRTUAL_NODES):
-            if pointer == len(self.node_names):
-                pointer = 0
-            self._vnode_map[i] = self._node_names[pointer]
-            pointer += 1
+            if not pointers:
+                pointers = generate_pointer(len(self.node_names))
+            self._vnode_map[i] = self._node_names[pointers.pop()]
 
     # Return the vnode name mapped to a particular vnode
     def get_node_for_vnode(self, vnode):

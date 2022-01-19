@@ -41,8 +41,8 @@ for name in node_names:
 # Populates the distributed data store
 for i in range(INITIAL_NUM_KEYS):
     user_info = UserInfo(InfoGenerator.generate_user_id(),
-                             UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
-                                        InfoGenerator.generate_password(PASSWORD_LENGTH)))
+                         UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
+                         InfoGenerator.generate_password(PASSWORD_LENGTH)))
 
     # Finds the right node and adds data to it
     # In the final solution, this is not necessary as sending data
@@ -90,7 +90,6 @@ print('\n\n')
 print('Random pickup of various keys on any node')
 for i in range(10):
     user_id = random.randint(0, INITIAL_NUM_KEYS - 1)
-    # TODO: The below has bug
     print(new_node.get_data(user_id))
 print('\n\n')
 
@@ -126,8 +125,8 @@ print('\n\n')
 
 # Test read/write on a new key
 user_info = UserInfo(InfoGenerator.generate_user_id(),
-                             UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
-                                        InfoGenerator.generate_password(PASSWORD_LENGTH)))
+                     UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
+                     InfoGenerator.generate_password(PASSWORD_LENGTH)))
 
 print(f'Generated user data: {user_info.user_data}')
 any_node.set_data(user_info.user_id, user_info.user_data)

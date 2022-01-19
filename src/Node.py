@@ -202,17 +202,6 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids        
-        
-        # user_ids = list(self._data_store.keys())
-        
-        # # aggregate keys to transfer per nodes
-        # agg_node_keys = {}
-        # for node in self._node_dict.keys():
-        #     agg_node_keys[node] = [key for key, n in transfer_node_mapping.items() if n == node]
-
-        # # Devive user ids equaly for local_vnode_list
-        # chunk_size = math.ceil(len(user_ids)/len(local_vnode_list))
-        # chunks_user_ids = [user_ids[i:i + chunk_size] for i in range(0, len(user_ids), chunk_size)]
         data = {vnode: [] for vnode in local_vnode_list}
         for user_id in self._data_store:
             vnode = user_id % self._TOTAL_VIRTUAL_NODES
