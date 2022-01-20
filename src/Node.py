@@ -27,10 +27,6 @@ class Node:
     @property
     def node_names(self):
         return list(self._node_dict.keys())
-
-    @property
-    def data_len(self):
-        return len(self._data_store)
     
     # For a masterless data fetch, any key can be requested from any Node
     # The Node should return the value directly if it has the ownership
@@ -154,17 +150,16 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids
-        # TODO: data is a bad name, need better
-        data = {vnode: [] for vnode in local_vnode_slice}
+        vnode_keys = {vnode: [] for vnode in local_vnode_slice}
         for user_id in self._data_store:
             vnode = user_id % self._TOTAL_VIRTUAL_NODES
             if vnode in local_vnode_slice:
-                data[vnode].append(user_id)
+                vnode_keys[vnode].append(user_id)
                 
         for idx, key in enumerate(local_vnode_slice):
             transfer_dict[key] = {
                 'target_node': new_node_name,
-                'keys': data[key]
+                'keys': vnode_keys[key]
             } 
 
         # Transfer the remapped keys to the new node

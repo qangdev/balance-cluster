@@ -1,5 +1,5 @@
 import random
-import math
+
 
 # Stores the vnode to node mapping
 # Composed within a node so that every node has its own vnode mapping
@@ -22,6 +22,9 @@ class VirtualNodeMap:
     def populate_map(self):
         def generate_pointer(n):
             # This helps on mapping randonly and equally
+            # each time it will return a list from 0 to n - 1 and then shuffle it.
+            # e.g: n = 4
+            # result [0,1,2,3]; [0,3,2,1]; [1,3,2,0]
             indexes = list(range(0, n))
             random.shuffle(indexes)
             return indexes
